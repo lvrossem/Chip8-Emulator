@@ -95,8 +95,8 @@ void Chip8::execute_instruction() {
     switch (opcode & 0xF000) {
         case 0x0000:
             switch (opcode) {
-                case 0x0E00:
-                    // Clear the display
+                case 0x00E0:
+                    // 00E0: Clear the display
                     for (int i = 0; i < DISPLAY_HEIGHT * DISPLAY_WIDTH; i++) {
                         display[i] = 0;
                     }
@@ -104,11 +104,16 @@ void Chip8::execute_instruction() {
                     break;
 
                 case 0x00EE:
-                    // Return from a routine
+                    // 00EE: Return from a routine
                     pc = stack[sp];
                     sp--;
                     pc += 2;
                     break;
+                
+                default:
+                    pc = opcode;
+                    break;
+                    
             }
             break;
 
@@ -395,6 +400,17 @@ void Chip8::execute_instruction() {
 
             }
             break;
-    }       
+    }
+
+    if (delay_timer > 0) {
+        --delay_timer;
+    }
+
+    if (sound_timer > 0) {
+        if(sound_timer == 1) {
+            // TODO: Implement sound
+        }
+        sound_timer--;
+    }
 }
 

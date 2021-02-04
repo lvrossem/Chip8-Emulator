@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     if (!chip8.load_rom(argv[1])) {
         return 2;
     }
-    
+
     // Emulation loop
     std::cout << "HERE 1\n";
     while (true) {
@@ -113,8 +113,8 @@ int main(int argc, char **argv) {
             chip8.set_draw_flag(false);
 
             // Store pixels in temporary buffer
-            for (int i = 0; i < 2048; ++i) {
-                uint8_t pixel = chip8.display[i];
+            for (int i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++) {
+                uint8_t pixel = chip8.get_display()[i];
                 pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
             }
 
@@ -126,6 +126,6 @@ int main(int argc, char **argv) {
         }
 
         // Sleep to slow down emulation speed
-        std::this_thread::sleep_for(std::chrono::microseconds(1200));
+        //std::this_thread::sleep_for(std::chrono::microseconds(1200));
     }
 }
