@@ -90,8 +90,9 @@ bool Chip8::load_rom(char* rom_path) {
 
 void Chip8::execute_instruction() {
     uint16_t opcode = memory[pc] << 8 | memory[pc + 1];
+    std::cout << "Current opcode: " << opcode << std::endl;
 
-    // Only look at highest 8 bits as we can't match exact opcode parameters
+    // Only look at highest 4 bits as we can't match exact opcode parameters
     switch (opcode & 0xF000) {
         case 0x0000:
             switch (opcode) {
@@ -174,17 +175,20 @@ void Chip8::execute_instruction() {
             uint8_t x = (opcode & 0x0F00) >> 8;
             uint8_t y = (opcode & 0x00F0) >> 4;
 
+            // Only look at lowest 4 bits to distinguish between instructions
             switch (opcode & 0x000F) {
                 case 0:
                     // 8xy0: Store value of register y in register x
                     registers[x] = registers[y];
                     pc += 2;
                     break;
+
                 case 1:
                     // 8xy1: Register x is assigned register x OR register y
                     registers[x] = registers[x] | registers[y];
                     pc += 2;
                     break;
+
                 case 2:
                     // 8xy2: Register x is assigned register x AND register y
                     registers[x] = registers[x] & registers[y];
@@ -329,6 +333,7 @@ void Chip8::execute_instruction() {
                 case 0x0007:
                     // Fx07: assign value of delay timer to register x
                     registers[(opcode & 0x0F00) >> 8] = delay_timer;
+                    pc += 2;
                     break;
                 
                 case 0x000A: {
@@ -368,6 +373,7 @@ void Chip8::execute_instruction() {
                 case 0x001E:
                     // Fx1E: Add value of register x to I
                     I += registers[(opcode & 0x0F00) >> 8];
+                    pc += 2;
                     break;
                 
                 case 0x0029:
@@ -409,6 +415,10 @@ void Chip8::execute_instruction() {
 
             }
             break;
+        
+        default:
+            std::cout << "Invalid opcode detected" << std::endl;
+            exit(1);
     }
 
     if (delay_timer > 0) {
