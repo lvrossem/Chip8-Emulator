@@ -30,6 +30,9 @@ class Chip8 {
         ~Chip8();
 
         void initialize();
+        void execute_instruction();
+
+        int get_file_size(char* file_path);
         bool load_rom(char* rom_path);
 
         uint8_t display[DISPLAY_HEIGHT * DISPLAY_WIDTH];
