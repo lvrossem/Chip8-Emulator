@@ -111,26 +111,27 @@ void Chip8::execute_instruction() {
                     break;
                 
                 default:
+                    // 0nnn: Execute routine at nnn
                     pc = opcode;
                     break;
-                    
+
             }
             break;
 
         case 0x1000:
-            // Jump to address pointed at by lowest 12 bits of opcode
+            // 1nnn: Jump to address nnn
             pc = opcode & 0x0FFF;
             break;
 
         case 0x2000:
-            // Call routine pointed at by lowest 12 bits
+            // 2nnn: Call routine pointed at by nnn
             sp++;
             stack[sp] = pc;
             pc = opcode & 0x0FFF;
             break;
 
         case 0x3000:
-            // Skip next instruction if register x is equal to lowest 8 bits
+            // 3xkk: Skip next instruction if register x is equal to lowest 8 bits
             if (registers[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
                 pc += 4;
             } else {
@@ -139,7 +140,7 @@ void Chip8::execute_instruction() {
             break;
 
         case 0x4000:
-            // Skip next instruction if register x is not equal to lowest 8 bits
+            // 4xkk: Skip next instruction if register x is not equal to lowest 8 bits
             if (registers[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
                 pc += 4;
             } else {
@@ -163,7 +164,7 @@ void Chip8::execute_instruction() {
             break;
 
         case 0x7000:
-            // 7xkk: add kk to register x
+            // 7xkk: Add kk to register x
             registers[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
             pc += 2;
             break;
@@ -175,29 +176,29 @@ void Chip8::execute_instruction() {
 
             switch (opcode & 0x000F) {
                 case 0:
-                    // 8xy0: store value of register y in register x
+                    // 8xy0: Store value of register y in register x
                     registers[x] = registers[y];
                     pc += 2;
                     break;
                 case 1:
-                    // 8xy1: register x is assigned register x OR register y
+                    // 8xy1: Register x is assigned register x OR register y
                     registers[x] = registers[x] | registers[y];
                     pc += 2;
                     break;
                 case 2:
-                    // 8xy2: register x is assigned register x AND register y
+                    // 8xy2: Register x is assigned register x AND register y
                     registers[x] = registers[x] & registers[y];
                     pc += 2;
                     break;
 
                 case 3:
-                    // 8xy3: register x is assigned register x XOR register y
+                    // 8xy3: Register x is assigned register x XOR register y
                     registers[x] = registers[x] ^ registers[y];
                     pc += 2;
                     break;
 
                 case 4:
-                    // 8xy4: register x is assigned register x + register y, carry goes to register F
+                    // 8xy4: Register x is assigned register x + register y, carry goes to register F
                     registers[x] += registers[y];
 
                     if (0xFF - registers[x] < registers[y]) {
@@ -209,7 +210,7 @@ void Chip8::execute_instruction() {
                     pc += 2;
                     break;
                 case 5:
-                    // 8xy5: register x is assigned register x - register y, carry goes to register F
+                    // 8xy5: Register x is assigned register x - register y, carry goes to register F
                     if (registers[x] > registers[y]) {
                         registers[15] = 0x1;
                     } else {
@@ -220,14 +221,14 @@ void Chip8::execute_instruction() {
                     break;
 
                 case 6:
-                    // 8xy6: register F is assigned LSB of register x; register x divided by 2
+                    // 8xy6: Register F is assigned LSB of register x; register x divided by 2
                     registers[15] = registers[x] & 0x01;
                     registers[x] = registers[x] >> 1;
                     pc += 2;
                     break;
 
                 case 7:
-                    // 8xy7: register x is assigned register y - register x; register F = NOT borrow
+                    // 8xy7: Register x is assigned register y - register x; register F = NOT borrow
                     if (registers[y] > registers[x]) {
                         registers[15] = 0x1;
                     } else {
@@ -239,7 +240,7 @@ void Chip8::execute_instruction() {
                     break;
 
                 case 14:
-                    // 8xyE: set register F to MSB of register x; multiply register x by 2
+                    // 8xyE: Set register F to MSB of register x; multiply register x by 2
                     registers[15] = registers[x] >> 7;
                     registers[x] = registers[x] << 1;
                     pc += 2;
@@ -248,7 +249,7 @@ void Chip8::execute_instruction() {
             break;
         }
         case 0x9000:
-            // 9xy0: skip next instruction is register x != register y
+            // 9xy0: Skip next instruction is register x != register y
             if (registers[(opcode & 0x0F00) >> 8] == registers[(opcode & 0x00F0) >> 4]) {
                 pc += 2;
             } else {
@@ -257,7 +258,7 @@ void Chip8::execute_instruction() {
             break;
 
         case 0xA000:
-            // Annn: assign nnn to I
+            // Annn: Assign nnn to I
             I = opcode & 0x0FFF;
             pc += 2;
             break;
@@ -268,13 +269,13 @@ void Chip8::execute_instruction() {
             break;
         
         case 0xC000:
-            // Cxkk: assign random byte AND kk to register x
+            // Cxkk: Assign random byte AND kk to register x
             registers[(opcode & 0x0F00) >> 8] = (rand() % 256) & (opcode & 0x00FF);
             pc += 2;
             break;
 
         case 0xD000: {
-            // Dxyn: display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
+            // Dxyn: Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
             uint8_t x = registers[(opcode & 0x0F00) >> 8];
             uint8_t y = registers[(opcode & 0x00F0) >> 4];
             uint8_t n = opcode & 0x000F;
@@ -304,6 +305,7 @@ void Chip8::execute_instruction() {
         case 0xE000:
             switch (opcode & 0x00FF) {
                 case 0x009E:
+                    // Ex9E: Skip next instruction if key with value x is pressed
                     if (keypad[(opcode & 0x0F00) >> 8] == 1) {
                         pc += 4;
                     } else {
@@ -312,6 +314,7 @@ void Chip8::execute_instruction() {
                     break;
                 
                 case 0x00A1:
+                    // ExA1: Skip next instruction if key with value x is not pressed
                     if (keypad[(opcode & 0x0F00) >> 8] != 1) {
                         pc += 4;
                     } else {
@@ -324,10 +327,12 @@ void Chip8::execute_instruction() {
         case 0xF000:
             switch (opcode & 0x00FF) {
                 case 0x0007:
+                    // Fx07: assign value of delay timer to register x
                     registers[(opcode & 0x0F00) >> 8] = delay_timer;
                     break;
                 
                 case 0x000A: {
+                    // Fx0A: Wait for key press and store key value in register x
                     bool key_pressed = false;
 
                     while (!key_pressed) {
@@ -349,20 +354,24 @@ void Chip8::execute_instruction() {
                 }
 
                 case 0x0015:
+                    // Fx15: Assign value of register x to delay timer
                     delay_timer = registers[(opcode & 0x0F00) >> 8];
                     pc += 2;
                     break;
 
                 case 0x0018:
+                    // Fx18: Assign value of register x to sound timer
                     sound_timer = registers[(opcode & 0x0F00) >> 8];
                     pc += 2;
                     break;
 
                 case 0x001E:
+                    // Fx1E: Add value of register x to I
                     I += registers[(opcode & 0x0F00) >> 8];
                     break;
                 
                 case 0x0029:
+                    // Fx29: assign location of sprite for register x to I
                     I = registers[(opcode & 0x0F00) >> 8] * 0x5;
                     pc += 2;
                     break;
@@ -407,7 +416,7 @@ void Chip8::execute_instruction() {
     }
 
     if (sound_timer > 0) {
-        if(sound_timer == 1) {
+        if (sound_timer == 1) {
             // TODO: Implement sound
         }
         sound_timer--;
