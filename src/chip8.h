@@ -19,6 +19,7 @@ class Chip8 {
         bool draw_flag;
 
         uint8_t memory[MEMORY_SIZE];
+        uint8_t keypad[16];
         uint8_t registers[16];
         uint8_t sound_timer;
         uint8_t delay_timer;
@@ -32,6 +33,10 @@ class Chip8 {
         Chip8();
         ~Chip8();
 
+        uint8_t* get_keypad() { return keypad; }
+        bool get_draw_flag() { return draw_flag; }
+        void set_draw_flag(bool flag) { draw_flag = flag; }
+
         void initialize();
         void execute_instruction();
 
@@ -39,7 +44,6 @@ class Chip8 {
         bool load_rom(char* rom_path);
 
         uint8_t display[DISPLAY_HEIGHT * DISPLAY_WIDTH];
-        uint8_t keypad[16];
 };
 
 #endif
