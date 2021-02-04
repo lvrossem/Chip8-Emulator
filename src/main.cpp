@@ -30,5 +30,5 @@ uint8_t keymap[16] = {
 };
 
 int main(int argc, char **argv) {
-    cout << "Hello chip8\n";
+    cout << "Hello chip8\n" << (0xFF / 100);
 }

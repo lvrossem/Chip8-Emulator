@@ -217,6 +217,7 @@ void Chip8::execute_instruction() {
             break;
         }
         case 0x9000:
+            // 9xy0: skip next instruction is register x != register y
             if (registers[(opcode & 0x0F00) >> 8] == registers[(opcode & 0x00F0) >> 4]) {
                 pc += 2;
             } else {
@@ -225,61 +226,147 @@ void Chip8::execute_instruction() {
             break;
 
         case 0xA000:
+            // Annn: assign nnn to I
             I = opcode & 0x0FFF;
             pc += 2;
             break;
         
         case 0xB000:
+            // Bnnn: Jump to nnn + register 0
             pc = (opcode & 0x0FFF) + registers[0];
             break;
         
         case 0xC000:
+            // Cxkk: assign random byte AND kk to register x
             registers[(opcode & 0x0F00) >> 8] = (rand() % 256) & (opcode & 0x00FF);
             pc += 2;
             break;
 
-        case 0xD000:
+        case 0xD000: {
+            // Dxyn: display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
+            uint8_t x = registers[(opcode & 0x0F00) >> 8];
+            uint8_t y = registers[(opcode & 0x00F0) >> 4];
+            uint8_t n = opcode & 0x000F;
+
+            registers[15] = 0;
+
+            for (int i = 0; i < n; i++) {
+                uint8_t pixel_value = memory[I + i];
+
+                for (int j = 0; j < 8; j++) {
+                    
+                    if ((pixel_value & (0x80 >> j)) != 0) {
+                        if(display[(x + j + ((y + i) * DISPLAY_WIDTH))] == 1) {
+                            registers[15] = 1;
+                        }
+
+                        display[x + j + ((y + i) * DISPLAY_WIDTH)] ^= 1;
+                    }
+                } 
+            }
+
+            pc += 2;
+            draw_flag = true;
             break;
+        }
 
         case 0xE000:
             switch (opcode & 0x00FF) {
                 case 0x009E:
+                    if (keypad[(opcode & 0x0F00) >> 8] == 1) {
+                        pc += 4;
+                    } else {
+                        pc += 2;
+                    }
                     break;
                 
                 case 0x00A1:
+                    if (keypad[(opcode & 0x0F00) >> 8] != 1) {
+                        pc += 4;
+                    } else {
+                        pc += 2;
+                    }
                     break;
-
             }
             break;
 
         case 0xF000:
             switch (opcode & 0x00FF) {
                 case 0x0007:
+                    registers[(opcode & 0x0F00) >> 8] = delay_timer;
                     break;
                 
-                case 0x000A:
+                case 0x000A: {
+                    bool key_pressed = false;
+
+                    while (!key_pressed) {
+                        uint8_t key = 0;
+                        while (key < 16) {
+                            if (keypad[key] == 1) {
+                                registers[(opcode & 0x0F00) >> 8] = key;
+                                key_pressed = true;
+                                key = 16;
+                            } else {
+                                key++;
+                            }
+                        }
+                        
+                    }
+
+                    pc += 2;
                     break;
+                }
 
                 case 0x0015:
+                    delay_timer = registers[(opcode & 0x0F00) >> 8];
+                    pc += 2;
                     break;
 
                 case 0x0018:
+                    sound_timer = registers[(opcode & 0x0F00) >> 8];
+                    pc += 2;
                     break;
 
                 case 0x001E:
+                    I += registers[(opcode & 0x0F00) >> 8];
                     break;
                 
                 case 0x0029:
+                    I = registers[(opcode & 0x0F00) >> 8] * 0x5;
+                    pc += 2;
                     break;
 
-                case 0x0033:
+                case 0x0033: {
+                    // Fx33: Store BCD-representations of val
+                    uint8_t value = registers[(opcode & 0x0F00) >> 8];
+                    memory[I] = value / 100;
+                    memory[I + 1] = (value / 10) % 10;
+                    memory[I + 2] = value % 10;
+
+                    pc += 2;
                     break;
+                }
                 
                 case 0x0055:
+                    // Fx55: Store registers 0 to x in memory starting at I
+                    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
+                        memory[I + i] = registers[i];
+                    }
+
+                    I += ((opcode & 0x0F00) >> 8) + 1;
+                    pc += 2;
                     break;
 
                 case 0x0065:
+                    // Fx65: Read registers 0 to x from memory starting at I
+                    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
+                        registers[i] = memory[I + i];
+                    }
+
+                    I += ((opcode & 0x0F00) >> 8) + 1;
+                    pc += 2;
                     break;
+
             }
             break;
     }       
