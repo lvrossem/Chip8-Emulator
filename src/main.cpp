@@ -61,16 +61,18 @@ int main(int argc, char **argv) {
             SDL_TEXTUREACCESS_STREAMING,
             64, 32);
 
-
+    std::cout << "HERE 1\n";
     Chip8 chip8 = Chip8();
     uint32_t pixels[2048];
 
     load:
     // Attempt to load ROM
-    if (!chip8.load_rom(argv[1]))
+    if (!chip8.load_rom(argv[1])) {
         return 2;
-
+    }
+    
     // Emulation loop
+    std::cout << "HERE 1\n";
     while (true) {
         chip8.execute_instruction();
 

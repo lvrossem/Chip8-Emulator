@@ -58,6 +58,8 @@ int Chip8::get_file_size(char* file_path) {
 }
 
 bool Chip8::load_rom(char* rom_path) {
+    initialize();
+    int rom_size = get_file_size(rom_path);
     std::ifstream input(rom_path, std::ios::binary);
 
     if (!input) {
@@ -65,7 +67,7 @@ bool Chip8::load_rom(char* rom_path) {
         return false;
     }
 
-    int rom_size = get_file_size(rom_path);
+    std::cout << "SIZE IS " << rom_size << std::endl;
 
     char *buffer = new char[rom_size];
 
@@ -75,7 +77,7 @@ bool Chip8::load_rom(char* rom_path) {
         std::cout << "ROM is too large" << std::endl;
         return false;
     } else {
-        for (int i = 0; i = rom_size; i++) {
+        for (int i = 0; i < rom_size; i++) {
             memory[INTERPRETER_SPACE + i] = buffer[i];
         }
     }
