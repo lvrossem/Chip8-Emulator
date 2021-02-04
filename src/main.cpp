@@ -3,6 +3,8 @@
 #include <thread>
 #include "stdint.h"
 #include "SDL2/SDL.h"
+#include "chip8.h"
+
 
 
 using namespace std;

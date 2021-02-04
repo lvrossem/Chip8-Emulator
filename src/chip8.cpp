@@ -22,6 +22,8 @@ void Chip8::initialize() {
         registers[i] = 0;
         stack[i] = 0; 
     }
+
+    srand(time(NULL));
 }
 
 int Chip8::get_file_size(char* file_path) {
@@ -126,14 +128,16 @@ void Chip8::execute_instruction() {
         case 0x6000:
             // 6xkk: Put kk in register x
             registers[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+            pc += 2;
             break;
 
         case 0x7000:
             // 7xkk: add kk to register x
             registers[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+            pc += 2;
             break;
 
-        case 0x8000:
+        case 0x8000: {
             // Iterate over possibilities starting with 8
             uint8_t x = (opcode & 0x0F00) >> 8;
             uint8_t y = (opcode & 0x00F0) >> 4;
@@ -142,19 +146,23 @@ void Chip8::execute_instruction() {
                 case 0:
                     // 8xy0: store value of register y in register x
                     registers[x] = registers[y];
+                    pc += 2;
                     break;
                 case 1:
                     // 8xy1: register x is assigned register x OR register y
                     registers[x] = registers[x] | registers[y];
+                    pc += 2;
                     break;
                 case 2:
                     // 8xy2: register x is assigned register x AND register y
                     registers[x] = registers[x] & registers[y];
+                    pc += 2;
                     break;
 
                 case 3:
                     // 8xy3: register x is assigned register x XOR register y
                     registers[x] = registers[x] ^ registers[y];
+                    pc += 2;
                     break;
 
                 case 4:
@@ -177,12 +185,14 @@ void Chip8::execute_instruction() {
                         registers[15] = 0x0;
                     }
                     registers[x] -= registers[y];
+                    pc += 2;
                     break;
 
                 case 6:
                     // 8xy6: register F is assigned LSB of register x; register x divided by 2
-                    registers[15] = registers[x] & 0x0001;
+                    registers[15] = registers[x] & 0x01;
                     registers[x] = registers[x] >> 1;
+                    pc += 2;
                     break;
 
                 case 7:
@@ -194,8 +204,84 @@ void Chip8::execute_instruction() {
                     }
 
                     registers[x] = registers[x] - registers[y];
+                    pc += 2;
+                    break;
 
-            }           
+                case 14:
+                    // 8xyE: set register F to MSB of register x; multiply register x by 2
+                    registers[15] = registers[x] >> 7;
+                    registers[x] = registers[x] << 1;
+                    pc += 2;
+                    break;
+            }       
+            break;
+        }
+        case 0x9000:
+            if (registers[(opcode & 0x0F00) >> 8] == registers[(opcode & 0x00F0) >> 4]) {
+                pc += 2;
+            } else {
+                pc += 4;
+            }
+            break;
+
+        case 0xA000:
+            I = opcode & 0x0FFF;
+            pc += 2;
+            break;
+        
+        case 0xB000:
+            pc = (opcode & 0x0FFF) + registers[0];
+            break;
+        
+        case 0xC000:
+            registers[(opcode & 0x0F00) >> 8] = (rand() % 256) & (opcode & 0x00FF);
+            pc += 2;
+            break;
+
+        case 0xD000:
+            break;
+
+        case 0xE000:
+            switch (opcode & 0x00FF) {
+                case 0x009E:
+                    break;
+                
+                case 0x00A1:
+                    break;
+
+            }
+            break;
+
+        case 0xF000:
+            switch (opcode & 0x00FF) {
+                case 0x0007:
+                    break;
+                
+                case 0x000A:
+                    break;
+
+                case 0x0015:
+                    break;
+
+                case 0x0018:
+                    break;
+
+                case 0x001E:
+                    break;
+                
+                case 0x0029:
+                    break;
+
+                case 0x0033:
+                    break;
+                
+                case 0x0055:
+                    break;
+
+                case 0x0065:
+                    break;
+            }
+            break;
     }       
 }
 

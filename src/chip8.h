@@ -6,10 +6,13 @@
 #define DISPLAY_HEIGHT 32
 #define DISPLAY_WIDTH 64
 
+#include <random>
 #include <stdint.h>
 #include <fstream>
 #include <iostream>
 #include <filesystem>
+
+#include "time.h"
 
 class Chip8 {
     private:
