@@ -61,7 +61,6 @@ int main(int argc, char **argv) {
             SDL_TEXTUREACCESS_STREAMING,
             64, 32);
 
-    std::cout << "HERE 1\n";
     Chip8 chip8 = Chip8();
     uint32_t pixels[2048];
 
@@ -72,7 +71,6 @@ int main(int argc, char **argv) {
     }
 
     // Emulation loop
-    std::cout << "HERE 1\n";
     while (true) {
         chip8.execute_instruction();
 
@@ -127,7 +125,6 @@ int main(int argc, char **argv) {
             SDL_RenderPresent(renderer);
         }
 
-        // Sleep to slow down emulation speed
-        //std::this_thread::sleep_for(std::chrono::microseconds(1200));
+        std::this_thread::sleep_for(std::chrono::microseconds(2000));
     }
 }

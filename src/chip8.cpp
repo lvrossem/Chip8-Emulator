@@ -67,8 +67,6 @@ bool Chip8::load_rom(char* rom_path) {
         return false;
     }
 
-    std::cout << "SIZE IS " << rom_size << std::endl;
-
     char *buffer = new char[rom_size];
 
     input.read(buffer, rom_size);
@@ -90,7 +88,6 @@ bool Chip8::load_rom(char* rom_path) {
 
 void Chip8::execute_instruction() {
     uint16_t opcode = memory[pc] << 8 | memory[pc + 1];
-    std::cout << "Current opcode: " << opcode << std::endl;
 
     // Only look at highest 4 bits as we can't match exact opcode parameters
     switch (opcode & 0xF000) {
