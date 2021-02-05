@@ -1,0 +1,2 @@
+# Chip-8 Emulator
+This is an emulator for the Chip-8 system, written in C++ as a stepping stone to develop a more complex emulator later on. Technical details are found at http://devernay.free.fr/hacks/chip8/C8TECH10.HTM.
